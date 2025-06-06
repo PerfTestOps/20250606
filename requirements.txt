@@ -6,3 +6,4 @@ fpdf==1.7.2
 plotly==6.1.2
 matplotlib==3.10.1
 shared==0.0.32
+numpy==1.23.2
