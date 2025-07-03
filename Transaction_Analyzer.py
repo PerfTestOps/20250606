@@ -11,9 +11,9 @@ from datetime import datetime
 
 def transaction_analysis_page():
 
-st.set_page_config(page_title="Transaction Analyzer",
-                   page_icon=":bar_chart:",
-                   )
+#st.set_page_config(page_title="Transaction Analyzer",
+                   #page_icon=":bar_chart:",
+                   #)
 
 #Define a function for generating a pie chart for different runs
 def generatepiechart(filtered_df1):
