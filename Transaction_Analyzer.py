@@ -192,6 +192,6 @@ def transaction_analysis_page():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
     else:
-        st.info("")
+        st.write("")
 
 
