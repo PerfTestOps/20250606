@@ -9,6 +9,8 @@ from datetime import datetime
 
 #import matplotlib.pyplot as plt
 
+def transaction_analysis_page():
+
 st.set_page_config(page_title="Transaction Analyzer",
                    page_icon=":bar_chart:",
                    )
