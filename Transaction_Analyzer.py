@@ -6,6 +6,7 @@ from datetime import datetime
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import matplotlib.pyplot as plt
+from io import BytesIO
 
 def transaction_analysis_page():
     def generatepiechart(filtered_df1):
@@ -86,10 +87,10 @@ def transaction_analysis_page():
             doc.add_paragraph(title)
             doc.add_picture(filename, width=Inches(5))
 
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"PerformanceTestReport_{timestamp}.docx"
-        doc.save(filename)
-        st.success(f"Word document saved successfully as: {filename}")
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        return buffer
 
     uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx", "txt"])
 
@@ -128,7 +129,7 @@ def transaction_analysis_page():
             else:
                 st.dataframe(filtered_df1)
 
-            # Response Time Graph (SLA as line)
+            # Response Time Graph
             st.subheader("Response Time Comparison Graph")
             x_axis = st.selectbox("Select X-axis", filtered_df1.columns.tolist(), index=0)
             y_axis = st.multiselect("Select Y-axis Columns", [col for col in filtered_df1.columns if col != x_axis], default=filtered_df1.columns[1:2])
@@ -155,7 +156,7 @@ def transaction_analysis_page():
                 fig.savefig("response_time_chart.png")
                 st.pyplot(fig)
 
-            # TPH Graph (Target TPH as line)
+            # TPH Graph
             st.subheader("TPH Comparison Graph")
             x_axis = st.selectbox("Select X-axis for TPH", filtered_df1.columns.tolist(), index=0)
             y_axis = st.multiselect("Select Y-axis Columns for TPH", [col for col in filtered_df1.columns if col != x_axis], default=filtered_df1.columns[2:3])
@@ -166,7 +167,7 @@ def transaction_analysis_page():
                 index = range(len(filtered_df1[x_axis]))
 
                 if 'Target TPH' in filtered_df1.columns:
-                    ax.plot(filtered_df1[x_axis], filtered_df1['Target TPH'], label='Target TPH', color='red', marker='D', linewidth=2)
+                    ax.plot(filtered_df1[x_axis], filtered_df1['Target TPH'], label='Target TPH', color='red', marker='o', linewidth=2)
 
                 for i, y in enumerate(y_axis):
                     if y != 'Target TPH':
@@ -203,7 +204,7 @@ def transaction_analysis_page():
                 fig.savefig("error_chart.png")
                 st.pyplot(fig)
 
-            # SLA Bar Chart (Final Graph)
+            # SLA Bar Chart
             st.title(":bar_chart: SLA Comparison Graph")
             fig, ax = plt.subplots(figsize=(10, 6))
             ax.plot(filtered_df1['TransactionName'], filtered_df1['SLA'], marker='o', label='SLA', color='red', linewidth=2)
@@ -224,5 +225,12 @@ def transaction_analysis_page():
 
             generatepiechart(filtered_df1)
 
-            if st.button('Generate Report'):
-                generate_report(filtered_df1, tolerance)
+            buffer = generate_report(filtered_df1, tolerance)
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filename = f"PerformanceTestReport_{timestamp}.docx"
+            st.download_button(
+                label="Generate Report",
+                data=buffer,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
